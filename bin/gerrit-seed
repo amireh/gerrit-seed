@@ -1,0 +1,28 @@
+#!/usr/local/bin/ruby
+
+blob = ARGF.read
+
+require 'gerrit_seed'
+
+logger = GerritSeed::Logger.new
+
+begin
+  GerritSeed::Seeder.new(
+    git: GerritSeed::Git.new(
+      log: logger,
+      dir: ENV.fetch('OUTDIR', File.join(Dir.pwd, 'build')),
+      host: ENV.fetch("GERRIT_HOST", 'localhost'),
+      port: ENV.fetch("GERRIT_PORT", 29418).to_i,
+      user: ENV.fetch("GERRIT_USER", 'admin'),
+    ),
+    gerrit: GerritSeed::Gerrit.new(
+      log: logger,
+      host: ENV.fetch("GERRIT_HOST", 'localhost'),
+      port: ENV.fetch("GERRIT_PORT", 29418).to_i,
+      user: ENV.fetch("GERRIT_USER", 'admin')
+    )
+  ).apply(YAML.safe_load(blob))
+rescue GerritSeed::Shell::CommandError => e
+  puts e.message
+  Kernel.exit 1
+end

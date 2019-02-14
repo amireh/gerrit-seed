@@ -1,0 +1,34 @@
+#!/usr/local/bin/ruby
+
+blob = ARGF.read
+
+require 'gerrit_seed'
+
+logger = GerritSeed::Logger.new
+gerrit = GerritSeed::Gerrit.new(
+  log: logger,
+  host: ENV.fetch("GERRIT_HOST", 'localhost'),
+  port: ENV.fetch("GERRIT_PORT", 29418).to_i,
+  user: ENV.fetch("GERRIT_USER", 'admin')
+)
+
+gerrit.install_plugin(
+  name: 'delete-project',
+  url: 'https://gerrit-ci.gerritforge.com/job/plugin-delete-project-bazel-stable-2.15/lastSuccessfulBuild/artifact/bazel-genfiles/plugins/delete-project/delete-project.jar'
+)
+
+begin
+  GerritSeed::Unseeder.new(
+    git: GerritSeed::Git.new(
+      log: logger,
+      dir: ENV.fetch('OUTDIR', File.join(Dir.pwd, 'build')),
+      host: ENV.fetch("GERRIT_HOST", 'localhost'),
+      port: ENV.fetch("GERRIT_PORT", 29418).to_i,
+      user: ENV.fetch("GERRIT_USER", 'admin'),
+    ),
+    gerrit: gerrit
+  ).apply(YAML.safe_load(blob))
+rescue GerritSeed::Shell::CommandError => e
+  puts e.message
+  Kernel.exit 1
+end
