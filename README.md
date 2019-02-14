@@ -27,7 +27,7 @@ example:
 
 # Create a project:
 - project:
-    name: String
+    name: banana
 
 # Create a user:
 - user:
