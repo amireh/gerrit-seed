@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = 'gerrit-seed'
-  s.version     = '1.0.0'
+  s.version     = '1.1.0'
   s.summary     = 'Seed Gerrit with sample data from a YAML file'
   s.description = 'Declarative Gerrit seeding with YAML.'
   s.executables = %w[gerrit-seed gerrit-unseed]
