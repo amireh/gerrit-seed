@@ -43,8 +43,10 @@ module GerritSeed
     def checkout(branch:, commit:)
       if available_branches.include?(branch)
         shell.('git', 'checkout', branch)
+        shell.('git clean -f -d')
       else
         shell.('git', 'checkout', '-b', branch, commit)
+        shell.('git clean -f -d')
       end
     end
 

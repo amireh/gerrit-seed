@@ -97,8 +97,18 @@ module GerritSeed
         commit: parent_branch_name,
       )
 
-      git.shell.("touch #{branch_name}.in")
-      git.shell.("git add #{branch_name}.in")
+      if change[:files]
+        change[:files].map do |file| File.expand_path(file, git.dir) end.each do |file|
+          FileUtils.mkdir_p(File.dirname(file)) unless File.exist?(File.dirname(file))
+          FileUtils.touch(file)
+        end
+
+        git.shell.("git add .")
+      else
+        git.shell.("touch #{branch_name}.in")
+        git.shell.("git add #{branch_name}.in")
+      end
+
       git.commit(
         author: author[:full_name],
         email: author[:email],
